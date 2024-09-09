@@ -1,6 +1,6 @@
 'use client'
-import { useRouter } from 'next/navigation';
-import React, { useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useEffect, useRef, useState } from 'react'
 import SendIcon from '@mui/icons-material/Send';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useFormik } from 'formik'
@@ -8,11 +8,23 @@ import { ExperienceSchema } from './FormSchema';
 
 function Experience() {
 
-
+  const searchParams = useSearchParams(); 
+  const [employeeId, setEmployeeId] = useState(null);
+  useEffect(() => {
+    if (searchParams) {
+      const employee_id = searchParams.get("employee_id"); // Get the employee_id from query
+      if (employee_id) {
+        setEmployeeId(employee_id); // Save employee_id to state
+        console.log("Employee ID from query:", employee_id);
+      } else {
+        console.error("Employee ID is missing from query.");
+      }
+    }
+  }, [searchParams]);
     const router = useRouter();
     const handleButtonClick = (e) => {
         e.preventDefault();
-        router.push('/education');
+        router.push(`/education?employee_id=${employeeId}`);
     }
 
     const handleBackClick = (e) => {
@@ -47,8 +59,33 @@ function Experience() {
   const { values, errors, touched, status, handleBlur, handleChange, handleSubmit } = useFormik({
     initialValues: initialValues,
       validationSchema: ExperienceSchema,
-      onSubmit: (values, errors, touched) => {
-  
+      onSubmit: async (values, formValues) => {
+        try {
+          const res = await fetch('/api/employee/experience', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(
+             { ...values,
+            employeeId,}
+            ),
+          });
+    
+          const result = await res.json();
+          if (result.success) {
+            console.log("Data saved:", result);
+            // router.push(`/experience?employee_id=${employeeId}`);
+          } else {
+            console.log(values)
+            console.log(formValues)
+            console.log(employeeId)
+            console.error("Failed to save data", result.error);
+            
+          }
+        } catch (error) {
+          console.error("Error submitting form:", error);
+        }
         console.log(values);
         // {errors.job && touched.job && errors.company && touched.company && errors.years && touched.years && errors.Clocation && touched.Clocation ? null : router.push("/education")}
       }
@@ -58,7 +95,7 @@ function Experience() {
   return (
     <div className="container auto flex flex-col justify-center items-center mt-8 mb-8 p-15">
       <h1 className="text-2xl text-center mt-8 font-bold">Employee's Job Experience Form</h1>
-
+      
      {forms.map((form, index) => (<form key={form.id} onSubmit={handleSubmit} className="flex flex-wrap justify-center flex-col items-center mt-9 mb-5 w-[80%]">
       <div className='w-[100%]'>
         <input

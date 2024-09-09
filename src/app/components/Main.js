@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import SendIcon from '@mui/icons-material/Send';
 import { useFormik } from 'formik'
 import { FormSchema } from "./FormSchema";
@@ -16,6 +16,7 @@ function Main() {
     router.push("/sub");
   };
 
+    const [submitting, setSubmitting] = useState();
   const initialValues =
   {
       name: "",
@@ -37,8 +38,31 @@ function Main() {
   const { values, errors, touched, status, handleBlur, handleChange, handleSubmit } = useFormik({
    initialValues: initialValues,
     validationSchema: FormSchema,
-    onSubmit: (values, errors, touched) => {
-
+    onSubmit:  async (values, errors, touched, actions) => {
+      try {
+        const res = await fetch('/api/employee/main', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(values),
+        });
+  
+        const data = await res.json();
+        if (res.ok) {
+          console.log('Form submitted successfully:', data);
+          // Navigate to the next page if successful
+          // router.push("/sub");
+          const employeeId = data.employeeId; // Use the employeeId from the response
+          router.push(`/sub?employee_id=${employeeId}`);
+        } else {
+          console.error('Error submitting form:', data);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+  
+      actions.setSubmitting(false);
       console.log(values);
       {errors.name && touched.name && errors.Fname && touched.Fname && errors.Address && touched.Address && errors.City && touched.City && errors.CNIC && touched.CNIC && errors.dob && touched.dob && errors.blood && touched.blood ? null : router.push("/sub")}
     }

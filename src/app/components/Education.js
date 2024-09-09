@@ -1,26 +1,39 @@
 'use client'
 
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import SendIcon from '@mui/icons-material/Send';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useFormik } from 'formik'
 import { EducationSchema } from './FormSchema';
 
 function Education() {
+  
+   const searchParams = useSearchParams(); 
+   const [employeeId, setEmployeeId] = useState(null);
+   useEffect(() => {
+     if (searchParams) {
+       const employee_id = searchParams.get("employee_id"); // Get the employee_id from query
+       if (employee_id) {
+         setEmployeeId(employee_id); // Save employee_id to state
+         console.log("Employee ID from query:", employee_id);
+       } else {
+         console.error("Employee ID is missing from query.");
+       }
+     }
+   }, [searchParams]);
+   const [forms, setForms] = useState([{ id: Date.now() }]);
 
 
-    const [forms, setForms] = useState([{ id: Date.now() }]);
    const addForm = () => {
         setForms([...forms, {id: Date.now}]);
    }
 
    const router = useRouter();
-   
    const handleBackClick = (e) => {
     // Navigate to the Sub page
     e.preventDefault();
-    router.push('/experience');
+    router.push(`/experience?employee_id=${employeeId}`);
   };
 
   const initialValues =
@@ -45,17 +58,37 @@ function Education() {
   const { values, errors, touched, status, handleBlur, handleChange, handleSubmit } = useFormik({
     initialValues: initialValues,
       validationSchema: EducationSchema,
-      onSubmit: (values, errors, touched) => {
-  
-        console.log(values);
-        // {errors.degree && touched.degree && errors.institute && touched.institute && errors.Syear && touched.Syear && errors.Fyear && touched.Fyear && errors.grade && touched.grade && errors.City && touched.City ? null : router.push("/education")}
+      onSubmit: async (values, formValues) => {
+        try {
+          const res = await fetch('/api/employee/education', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ...values, employeeId }),
+          });
+      
+          const result = await res.json();
+          if (result.success) {
+            console.log("Data saved:", result);
+            // Optionally, redirect or show a success message
+          } else {
+            console.error("Failed to save data", result.error);
+          }
+        } catch (error) {
+          console.error("Error submitting form:", error);
+        }
       }
     });
   return (
     <div className="container auto flex flex-col justify-center items-center mt-8 mb-8 p-15">
       <h1 className="text-2xl font-bold">Employee's Education Form</h1>
-
-     {forms.map((form,index) =>( <form key={form.id} className="flex flex-wrap justify-center flex-col items-center mb-5 mt-9 w-[80%]">
+      {employeeId ? (
+      <p>Employee ID: {employeeId}</p>
+    ) : (
+      <p>Employee ID not found</p>
+    )}
+     {forms.map((form,index) =>( <form key={form.id} onSubmit={handleSubmit} className="flex flex-wrap justify-center flex-col items-center mb-5 mt-9 w-[80%]">
       <div className='w-[100%]'>
         <input
           type="text"
@@ -91,7 +124,7 @@ function Education() {
             name="Syear"
             ref={InputSyear}
             placeholder="Year of Starting"
-            className="Input duration-200 bg-primarylight py-4 rounded-3xl px-6  border-gray-300 p-2  md:w-[80%]"
+            className="Input duration-200 bg-primarylight py-4 rounded-3xl px-6  border-gray-300 p-2 w-[100%]"
           />
           {errors.Syear && touched.Syear ? (<p className='form-error'>{errors.Syear}</p>) : null}
           </div>
@@ -104,7 +137,7 @@ function Education() {
             name="Fyear"
             ref={InputFyear}
             placeholder="Year of Passing degree"
-            className="Input duration-200 bg-primarylight py-4 rounded-3xl px-6  border-gray-300 p-2 md:w-[80%]"
+            className="Input duration-200 bg-primarylight py-4 rounded-3xl px-6  border-gray-300 p-2 w-[100%]"
           />
           {errors.Fyear && touched.Fyear ? (<p className='form-error'>{errors.Fyear}</p>) : null}
         </div>

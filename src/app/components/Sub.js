@@ -1,6 +1,6 @@
 "use client";
-import { useRouter } from "next/navigation";
-import React, { useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useRef, useState } from "react";
 import SendIcon from "@mui/icons-material/Send";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useFormik } from "formik";
@@ -8,6 +8,22 @@ import { SubSchema } from "./FormSchema";
 
 function Sub() {
   const router = useRouter();
+  const searchParams = useSearchParams(); 
+  const [employeeId, setEmployeeId] = useState(null);
+
+
+
+  useEffect(() => {
+    if (searchParams) {
+      const employee_id = searchParams.get("employee_id"); // Get the employee_id from query
+      if (employee_id) {
+        setEmployeeId(employee_id); // Save employee_id to state
+        console.log("Employee ID from query:", employee_id);
+      } else {
+        console.error("Employee ID is missing from query.");
+      }
+    }
+  }, [searchParams]);
 
   const initialValues = {
     CAddress: "",
@@ -50,45 +66,40 @@ function Sub() {
   } = useFormik({
     initialValues: initialValues,
     validationSchema: SubSchema,
-    onSubmit: (values, errors, touched) => {
-      console.log(values);
-      {
-        errors.CAddress &&
-        touched.CAddress &&
-        errors.CArea &&
-        touched.CArea &&
-        errors.Ccity &&
-        touched.Ccity &&
-        errors.PAddress &&
-        touched.PAddress &&
-        errors.PArea &&
-        touched.PArea &&
-        errors.Pcity &&
-        touched.Pcity &&
-        errors.mobile &&
-        touched.mobile &&
-        errors.phone &&
-        touched.phone &&
-        errors.Ename &&
-        touched.Ename &&
-        errors.ECname &&
-        touched.ECname &&
-        errors.Emobile &&
-        touched.Emobile &&
-        errors.email &&
-        touched.email &&
-        errors.doj &&
-        touched.doj
-          ? null
-          : router.push("/experience");
+    onSubmit: async ( formValues) => {
+      if (!employeeId) {
+        console.error("Employee ID is missing. Cannot submit form.");
+        return; // Stop form submission
       }
+      try {
+        const res = await fetch('/api/employee/sub', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(
+           { ...formValues,
+          employeeId,}
+          ),
+        });
+  
+        const result = await res.json();
+        if (result.success) {
+          console.log("Data saved:", result);
+          router.push(`/experience?employee_id=${employeeId}`);
+        } else {
+          console.log(values)
+          console.error("Failed to save data", result.error);
+          
+        }
+      } catch (error) {
+        console.error("Error submitting form:", error);
+      }
+  
+  
     },
   });
-  const handleButtonClick = (e) => {
-    // Navigate to the Sub page
-    e.preventDefault();
-    router.push("/experience");
-  };
+
   const handleBackClick = (e) => {
     // Navigate to the Sub page
     e.preventDefault();
@@ -100,6 +111,11 @@ function Sub() {
       <h1 className="text-2xl font-bold mt-8">
         Employee's sub Information Form
       </h1>
+      {employeeId ? (
+      <p>Employee ID: {employeeId}</p>
+    ) : (
+      <p>Employee ID not found</p>
+    )}
 
       <form
         className="flex flex-wrap justify-center flex-col items-center mt-9 w-[80%] mb-8"
@@ -111,6 +127,7 @@ function Sub() {
             placeholder="Current Address"
             ref={InputCAddress}
             value={values.CAddress}
+            name="CAddress"
             onChange={handleChange}
             onBlur={handleBlur}
             className="Input duration-200 bg-primarylight py-4 rounded-3xl px-6  border-gray-300 p-2 m-2 w-[100%]"
@@ -126,6 +143,7 @@ function Sub() {
                 ref={InputCArea}
                 value={values.CArea}
                 onChange={handleChange}
+                name="CArea"
                 onBlur={handleBlur}
                 className="Input duration-200 bg-primarylight py-4 rounded-3xl px-6  border-gray-300 p-2  md:w-[100%]"
               />
@@ -138,6 +156,7 @@ function Sub() {
                 type="text"
                 placeholder="Current City"
                 value={values.Ccity}
+                name="Ccity"
                 onChange={handleChange}
                 onBlur={handleBlur}
                 ref={InputCcity}
@@ -168,6 +187,7 @@ function Sub() {
                 type="text"
                 placeholder="Permenant Area"
                 ref={InputPArea}
+                name="PArea"
                 value={values.PArea}
                 onChange={handleChange}
                 onBlur={handleBlur}
@@ -184,6 +204,7 @@ function Sub() {
                 ref={InputPcity}
                 value={values.Pcity}
                 onChange={handleChange}
+                name="Pcity"
                 onBlur={handleBlur}
                 className="Input duration-200 bg-primarylight py-4 rounded-3xl px-6  border-gray-300 p-2 md:w-[100%]"
               />
@@ -195,10 +216,12 @@ function Sub() {
           <div className="flex w-[100%] flex-col gap-3  justify-between  md:flex-row md:gap-5 m-2">
             <div className="w-[100%] mt-2">
               <input
-                type="number"
+                type="tel"
+                pattern="[0-9]{4}-[0-9]{7}"
                 placeholder="Mobile No."
                 ref={Inputmobile}
                 value={values.mobile}
+                name="mobile"
                 onChange={handleChange}
                 onBlur={handleBlur}
                 className="Input duration-200 bg-primarylight py-4 rounded-3xl px-6  border-gray-300 p-2  md:w-[100%]"
@@ -209,8 +232,10 @@ function Sub() {
             </div>
             <div className="w-[100%] mt-2">
               <input
-                type="text"
+                 type="tel"
+                pattern="[0-9]{4}-[0-9]{7}"
                 placeholder="Phone No."
+                name="phone"
                 ref={Inputphone}
                 value={values.phone}
                 onChange={handleChange}
@@ -228,6 +253,7 @@ function Sub() {
                 type="text"
                 placeholder="Emergency Contact Name"
                 ref={InputEname}
+                name="Ename"
                 value={values.Ename}
                 onChange={handleChange}
                 onBlur={handleBlur}
@@ -242,6 +268,7 @@ function Sub() {
                 type="text"
                 placeholder="Emergency Contact Relation"
                 ref={InputECname}
+                name="ECname"
                 value={values.ECname}
                 onChange={handleChange}
                 onBlur={handleBlur}
@@ -257,6 +284,7 @@ function Sub() {
                 ref={InputEmobile}
                 value={values.Emobile}
                 onChange={handleChange}
+                name="Emobile"
                 onBlur={handleBlur}
                 placeholder="Emergency Contact Number"
                 className="Input duration-200 bg-primarylight py-4 rounded-3xl px-6  border-gray-300 p-2 md:w-[100%]"
@@ -269,11 +297,12 @@ function Sub() {
           <div className="flex w-[100%] flex-col gap-3 justify-between  md:flex-row md:gap-5 m-2">
             <div className="w-[100%] mt-2">
               <input
-                type="text"
+                type="email"
                 placeholder="Email Address"
                 ref={Inputemail}
                 value={values.email}
                 onChange={handleChange}
+                name="email"
                 onBlur={handleBlur}
                 className="Input duration-200 bg-primarylight py-4 rounded-3xl px-6  border-gray-300 p-2  md:w-[100%]"
               />
@@ -283,11 +312,12 @@ function Sub() {
             </div>
             <div className="w-[100%] mt-2">
               <input
-                type="text"
+                type="date"
                 placeholder="Date Of Joining"
                 ref={Inputdoj}
                 value={values.doj}
                 onChange={handleChange}
+                name="doj"
                 onBlur={handleBlur}
                 className="Input duration-200 bg-primarylight py-4 rounded-3xl px-6  border-gray-300 p-2 md:w-[100%]"
               />
