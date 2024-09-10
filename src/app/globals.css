@@ -33,7 +33,7 @@ body {
   font-size: 12px;
   display: inline-block;
   margin-bottom: 0.5rem;
-  padding-left: 2rem;
+  padding-left: 1rem;
 }
 .Input:hover,
 .Input:focus-visible {
@@ -42,6 +42,8 @@ body {
   background-color: #16282C!important;
   outline: none!important;
 }
+
+
 .button{
   overflow: hidden;
   display: inline-block;
@@ -61,7 +63,7 @@ body {
   position: relative;
   z-index: 1;
   padding: 16px 70px 16px 35px;
-  font-size: 15px;
+  /* font-size: 15px; */
   font-weight: 600;
   color: #fff;
   background-color: transparent;
@@ -69,6 +71,8 @@ body {
   cursor: pointer!important;
   border: 1px solid #00CDBD;
 }
+
+
 .button-back{
   overflow: hidden;
   display: inline-block;
@@ -122,6 +126,7 @@ body {
   font-size: 15px;
   background-color: #00CDBD;
 }
+
 .button-icon-back{
   position: absolute;
   left: -1px;
@@ -152,4 +157,49 @@ body {
   transform: translateX(100%);
   transition: all .3s ease-out;
   background-color: #00CDBD;
+}
+
+@media (max-width: 768px) {
+  .button-icon {
+      width: 48px;
+      height: 48px;
+  }
+  
+.button-icon-back{
+  width: 48px;
+      height: 48px;
+}
+.button {
+  font-size: 1rem /* 16px */;
+  line-height: 1.5rem /* 24px */;
+  padding: 11px 65px 11px 30px;
+}
+.button-back{
+  font-size: 1rem /* 16px */;
+  line-height: 1.5rem /* 24px */;
+  padding: 11px 30px 11px 65px;
+}
+}
+
+@media (max-width: 640px) {
+  .button {
+      font-size: .8rem /* 16px */;
+      line-height: 1.5rem /* 24px */;
+      padding: 11px 55px 11px 25px;
+  }
+  .form-error{
+    padding-left: .5rem;
+    font-size: 10px;
+    margin-top: -0.5rem;
+  }
+
+  .button-back {
+      font-size: .8rem /* 16px */;
+      line-height: 1.5rem /* 24px */;
+      padding: 11px 25px 11px 55px;
+  }
+  .button-text {
+      font-size: .8rem /* 16px */;
+    
+  }
 }
