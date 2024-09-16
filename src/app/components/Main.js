@@ -7,18 +7,36 @@ import { FormSchema } from "./FormSchema";
 
 function Main() {
   const router = useRouter();
+  const [imageError, setImageError] = useState("");
+  const [imageFile, setImageFile] = useState(null);
 
-  const handleButtonClick = (e) => {
-    // Navigate to the Sub page
-    e.preventDefault();
-    router.push("/sub");
-  };
 
-  const [submitting, setSubmitting] = useState();
+  // const [submitting, setSubmitting] = useState();
+ // Image validation (size and type)
+ const handleImageChange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+  if (!allowedTypes.includes(file.type)) {
+    setImageError("Only JPEG, JPG, and PNG formats are allowed.");
+    return;
+  }
+
+  if (file.size > 5 * 1024 * 1024) { // 5MB
+    setImageError("File size must be less than 5MB.");
+    return;
+  }
+
+  setImageFile(file);
+  setImageError("");
+};
+
+
   const initialValues = {
     name: "",
     Fname: "",
-    Address: "",
+    // Address: "",
     City: "",
     CNIC: "",
     dob: "",
@@ -26,7 +44,7 @@ function Main() {
   };
   const Inputname = useRef();
   const InputFname = useRef();
-  const InputAddress = useRef();
+  // const InputAddress = useRef();
   const InputCity = useRef();
   const InputCNIC = useRef();
   const Inputdob = useRef();
@@ -74,8 +92,8 @@ function Main() {
         touched.name &&
         errors.Fname &&
         touched.Fname &&
-        errors.Address &&
-        touched.Address &&
+        // errors.Address &&
+        // touched.Address &&
         errors.City &&
         touched.City &&
         errors.CNIC &&
@@ -127,7 +145,7 @@ function Main() {
           {errors.Fname && touched.Fname ? (
             <p className="form-error">{errors.Fname}</p>
           ) : null}
-          <input
+          {/* <input
             type="text"
             placeholder="Address"
             value={values.Address}
@@ -139,7 +157,7 @@ function Main() {
           />
           {errors.Address && touched.Address ? (
             <p className="form-error">{errors.Address}</p>
-          ) : null}
+          ) : null} */}
         </div>
 
         <div className="flex w-[100%]  flex-col justify-between gap-4  md:flex-row mt-2 mb-2">
@@ -206,10 +224,27 @@ function Main() {
             ) : null}
           </div>
         </div>
+        {/* <div className="flex w-[100%] justify-between gap-2 md:gap-9 mt-2 mb-2">
+          <div className="w-[100%]">
+            <input
+              type="date"
+              value={values.dob}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              name="dob"
+              ref={Inputdob}
+              placeholder="Date of birth"
+              className=" rounded-3xl text-sm md:text-base duration-200 Input bg-primarylight py-4 px-5 w-[100%]"
+            />
+            {errors.dob && touched.dob ? (
+              <p className="form-error">{errors.dob}</p>
+            ) : null}
+          </div>
+          </div> */}
         <div className="flex justify-between w-[100%] items-center px-2 mt-8">
           <p className="text-sm md:text-base ">Page 1/4</p>
           <button type="submit" className="button">
-            <span className="button-text text-sm md:text-base"> SEND</span>
+            <span className="button-text text-sm md:text-base"> NEXT</span>
             <span className="button-icon">
               <SendIcon className="text-xl md:text-2xl" />
             </span>

@@ -9,6 +9,11 @@ import { ExperienceSchema } from "./FormSchema";
 function Experience() {
   const searchParams = useSearchParams();
   const [employeeId, setEmployeeId] = useState(null);
+  const [forms, setForms] = useState([{ id: Date.now(), isSaved: false, isDisabled: false }]);  // State to keep track of all forms
+
+
+
+
   useEffect(() => {
     if (searchParams) {
       const employee_id = searchParams.get("employee_id"); // Get the employee_id from query
@@ -29,15 +34,15 @@ function Experience() {
   const handleBackClick = (e) => {
     // Navigate to the Sub page
     e.preventDefault();
-    router.push("/sub");
+    router.push(`/sub?employee_id=${employeeId}`);
   };
 
   // State to keep track of all forms
-  const [forms, setForms] = useState([{ id: Date.now() }]);
+  
 
   // Function to add a new form
   const addForm = () => {
-    setForms([...forms, { id: Date.now() }]);
+    setForms([...forms, { id: Date.now(), isSaved: false, isDisabled: false }]);
   };
 
   const initialValues = {
@@ -77,6 +82,14 @@ function Experience() {
         const result = await res.json();
         if (result.success) {
           console.log("Data saved:", result);
+          setForms((prevForms) =>
+            prevForms.map((form, index) => {
+              if (index === prevForms.length - 1) {
+                return { ...form, isSaved: true, isDisabled: true }; // Disable and mark form as saved
+              }
+              return form;
+            })
+          );
           // router.push(`/experience?employee_id=${employeeId}`);
         } else {
           console.log(values);
@@ -112,6 +125,7 @@ function Experience() {
               onBlur={handleBlur}
               name="job"
               ref={Inputjob}
+              disabled={form.isDisabled}
               placeholder="Job Title"
               className="Input text-sm md:text-base duration-200 bg-primarylight py-4 rounded-3xl px-6  p-2 mt-2 mb-2 w-[100%]"
             />
@@ -127,6 +141,7 @@ function Experience() {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 name="company"
+                disabled={form.isDisabled}
                 ref={Inputcompany}
                 placeholder="Company Name"
                 className="Input text-sm md:text-base duration-200 bg-primarylight py-4 rounded-3xl px-6  p-2  w-[100%]"
@@ -141,6 +156,7 @@ function Experience() {
                 placeholder="Number of Years"
                 value={values.years}
                 onChange={handleChange}
+                disabled={form.isDisabled}
                 onBlur={handleBlur}
                 name="years"
                 ref={Inputyears}
@@ -158,6 +174,7 @@ function Experience() {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 name="Clocation"
+                disabled={form.isDisabled}
                 ref={InputClocation}
                 className="Input text-sm md:text-base duration-200 bg-primarylight py-4 rounded-3xl px-6 p-2 w-[100%]"
               />
@@ -170,6 +187,7 @@ function Experience() {
             placeholder="Summary"
             value={values.summary}
             onChange={handleChange}
+            disabled={form.isDisabled}
             onBlur={handleBlur}
             name="summary"
             ref={Inputsummary}
@@ -180,15 +198,20 @@ function Experience() {
               Save
             </button>
           </div>
+          {form.isSaved && (
+            <p className="text-green-600">Form saved successfully!</p>
+          )}
         </form>
       ))}
       <div className="flex justify-end w-[95%] md:w-[80%]">
+      {forms.length === 0 || forms[forms.length - 1].isSaved  ? (
         <button
           onClick={addForm}
           className="border-2 border-blue-600 duration-200 text-sm md:text-base uppercase hover:bg-blue-600 text-white text-blue mb-5 rounded-3xl px-5 py-3"
         >
           Add
         </button>
+      ) : null}
         <button
           onClick={handleButtonClick}
           className="border-2 border-red-600 ml-5 uppercase duration-200 hover:bg-red-600 text-white text-blue mb-5 rounded-3xl text-sm md:text-base px-5 py-3"
@@ -207,7 +230,7 @@ function Experience() {
         </button>
         <p className="text-sm md:text-base ">Page 3/4</p>
         <button onClick={handleButtonClick} className="button">
-          <span className="button-text"> SEND</span>
+          <span className="button-text"> NEXT</span>
           <span className="button-icon">
             <SendIcon className="text-xl md:text-2xl" />
           </span>

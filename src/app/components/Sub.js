@@ -335,7 +335,7 @@ function Sub() {
             </button>
             <p className="text-sm md:text-base">Page 2/4</p>
             <button type="submit" className="button">
-              <span className="button-text"> SEND</span>
+              <span className="button-text"> NEXT</span>
               <span className="button-icon">
                 <SendIcon className="text-xl md:text-2xl" />
               </span>
